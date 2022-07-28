@@ -1,2 +1,2 @@
 # AnimeStyleRenderingEngine
-Research Project for Japanese Animation Style Rendering Using Directx12
+Research Project for Japanese Animation Style Rendering Using DirectX12
