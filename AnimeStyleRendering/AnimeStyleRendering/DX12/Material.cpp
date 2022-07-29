@@ -340,46 +340,59 @@ void Material::OnIMGUIRender()
 		{
 			if (ImGui::Selectable(m_Shader->m_Name.c_str()))
 			{
+				//TODO : Shader 다른 걸로 교체가능하도록 기능 만들기
 			}
-			
+		}
 			ImGui::Text("Parameters");
 
 			for (auto& data : m_vecMaterialResourceData)
 			{
-				if (!data.Resource) continue;
-				if (data.ImGuiTexture.handle.ptr) IMGUIManager::Inst().RemoveTexture(data.ImGuiTexture);
-				
-				D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc;
-				
-				ZeroMemory(&srvDesc, sizeof(srvDesc));
-				srvDesc.Format = data.Resource->GetDesc().Format;
-				srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
-				srvDesc.Texture2D.MipLevels = 1;
-				srvDesc.Texture2D.MostDetailedMip = 0;
-				srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
-
-				data.ImGuiTexture = IMGUIManager::Inst().AddTexture(data.Resource.Get(), srvDesc);
-
-				ImGui::Text(data.Name.c_str());
-				ImGui::SameLine();
-				ImGui::ImageButton((ImTextureID)data.ImGuiTexture.handle.ptr, {100, 100});
-
-				if (ImGui::BeginDragDropTarget())
+				switch (data.Type)
 				{
-					const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("CONTENT_BROWSER_ITEM");
-					if (payload)
+				case D3D_SIT_CBUFFER:
+				{
+					ImGui::Text("< CBuffer Property >");
+					ImGui::Text(data.Name.c_str());
+					break;
+				}
+				case D3D_SIT_TEXTURE:
+				{
+					ImGui::Text("< Texture Property >");
+					ImGui::Text(data.Name.c_str());
+					if (data.ImGuiTexture.handle.ptr) IMGUIManager::Inst().RemoveTexture(data.ImGuiTexture);
+
+					D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc{};
+					srvDesc.Format = data.Resource->GetDesc().Format;
+					srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
+					srvDesc.Texture2D.MipLevels = 1;
+					srvDesc.Texture2D.MostDetailedMip = 0;
+					srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
+
+					data.ImGuiTexture = IMGUIManager::Inst().AddTexture(data.Resource.Get(), srvDesc);
+					ImGui::SameLine();
+					ImGui::ImageButton((ImTextureID)data.ImGuiTexture.handle.ptr, { 100, 100 });
+
+
+					if (ImGui::BeginDragDropTarget())
 					{
-						std::string fileName = (char*)payload->Data;
-						auto texture = ResourceManager::Inst().GetTexture(fileName);
-						if (texture)
+						const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("CONTENT_BROWSER_ITEM");
+						if (payload)
 						{
-							//SetTexture(texture, m_Shader->m_PixelShader.MapMetaData[data.Name].BindPoint);
+							std::string fileName = (char*)payload->Data;
+							auto texture = ResourceManager::Inst().GetTexture(fileName);
+							if (texture)
+							{
+								SetTexture(fileName, texture);
+							}
 						}
+						ImGui::EndDragDropTarget();
 					}
-					ImGui::EndDragDropTarget();
+				}
+				default:
+					break;
 				}
 			}
-		}
+		
 		ImGui::TreePop();
 	}
 }
