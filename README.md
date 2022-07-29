@@ -1,4 +1,7 @@
 # AnimeStyleRenderingEngine
+
+Personal Toy Project.
+
 Research Project for Japanese Animation Style Rendering Using DirectX12
 
 I use Unity Chan Model (https://unity-chan.com/)
