@@ -33,6 +33,6 @@
 
 # Directories
 .vs/
-AnimeStyleRendering/x64/
+**/x64/
 
 # Other
